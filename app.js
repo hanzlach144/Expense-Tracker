@@ -11,6 +11,7 @@ const budgetInput = document.getElementById("budget-input");
 const setBudgetButton = document.getElementById("set-budget-btn");
 const expenseDateInput = document.getElementById("expense-date");
 const expenseChartCanvas = document.getElementById("expenseChart");
+const expenseBarChart = document.getElementById("expenseBarChart");
 
 const budgetDisplay = document.getElementById("budget-display");
 const remainingBudget = document.getElementById("remaining-budget");
@@ -39,6 +40,7 @@ setBudgetButton.addEventListener("click", function () {
 let expenses = [];
 let editingIndex = -1;
 let expenseChart;
+let barChart;
 
 
 addExpenseButton.addEventListener("click", addExpense);
@@ -85,13 +87,10 @@ let formattedMonth =
   } else {
     expenses.push(expense);
   }
-  console.log(expenses);
-  applyFilters();
-  updateTotal();
-  updateRemaining();
   saveExpenses();
   populateMonthFilter();
-  updateChart(expenses);
+  applyFilters();
+  updateRemaining();
   clearInputs();
   editingIndex = -1;
   addExpenseButton.textContent = "Add Expense";
@@ -129,11 +128,10 @@ function displayExpense (expense, index) {
 
   deleteButton.addEventListener("click", function () {
     expenses.splice(index,1);
-    applyFilters();
-    updateTotal();
-    updateRemaining();
     saveExpenses();
-    updateChart(expenses);
+    populateMonthFilter();
+    applyFilters();
+    updateRemaining();
   });
 
   let editButton = document.createElement("button");
@@ -208,6 +206,7 @@ if (sortValue === "low-high") {
       renderExpenses(filteredExpenses);
       updateFilteredTotal(filteredExpenses);
       updateChart(filteredExpenses);
+      updateBarChart(filteredExpenses);
 }
 
 function populateMonthFilter () {
@@ -242,7 +241,7 @@ function populateMonthFilter () {
 }
 
 function updateChart (expenseArray) {
-  let categoryTotals = [];
+  let categoryTotals = {};
 
   expenseArray.forEach(function(expense) {
     if(categoryTotals[expense.category]) {
@@ -300,6 +299,89 @@ function updateChart (expenseArray) {
 });
 
 }
+
+function updateBarChart(expenseArray) {
+  let categoryTotals = {};
+
+  expenseArray.forEach(function(expense) {
+    if(categoryTotals[expense.category]) {
+      categoryTotals[expense.category] += expense.amount;
+    } else {
+      categoryTotals[expense.category] = expense.amount;
+    }
+
+    });
+
+    let labels = Object.keys(categoryTotals);
+    let data = Object.values(categoryTotals);
+
+    if(barChart) {
+      barChart.destroy();
+    }
+
+
+    barChart = new Chart(expenseBarChart.getContext("2d"), {
+
+    type: "bar",
+
+    data: {
+
+        labels: labels,
+
+        datasets: [{
+    label: "Expense Amount (Rs.)",
+    data: data,
+    backgroundColor: [
+        "#FF6384",
+        "#36A2EB",
+        "#FFCE56",
+        "#4BC0C0",
+        "#9966FF",
+        "#FF9F40",
+        "#8BC34A",
+        "#E91E63",
+        "#795548",
+        "#607D8B",
+        "#9C27B0"
+    ],
+    borderRadius: 8
+}]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+            legend: {
+                display: false
+            },
+          
+              title: {
+        display: true,
+        text: "Expense Amount by Category"
+    }
+
+},
+
+        scales: {
+
+            y: {
+                beginAtZero: true
+            }
+
+        }
+
+    }
+
+});
+
+}
+
 
 function updateRemaining () {
   let remaining = budget - getTotalExpenses();
@@ -378,8 +460,4 @@ populateMonthFilter();
 
 applyFilters();
 
-updateTotal();
-
 updateRemaining();
-
-updateChart(expenses);
