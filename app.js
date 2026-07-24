@@ -1,0 +1,385 @@
+const expenseNameInput = document.getElementById("expense-name");
+const expenseAmountInput = document.getElementById("expense-amount");
+const addExpenseButton = document.getElementById("add-expense-btn");
+const categorySelect = document.getElementById("expenses-select");
+const expenseList = document.getElementById("expense-list");
+const totalExpenses = document.getElementById("total-expenses");
+const searchExpenseInput = document.getElementById("search-expense");
+const categoryFilter = document.getElementById("filter-category");
+const sortExpenses = document.getElementById("sort-expenses");
+const budgetInput = document.getElementById("budget-input");
+const setBudgetButton = document.getElementById("set-budget-btn");
+const expenseDateInput = document.getElementById("expense-date");
+const expenseChartCanvas = document.getElementById("expenseChart");
+
+const budgetDisplay = document.getElementById("budget-display");
+const remainingBudget = document.getElementById("remaining-budget");
+const budgetWarning = document.getElementById("budget-warning");
+const monthFilter = document.getElementById("month-filter");
+
+let budget = Number(localStorage.getItem("budget")) || 0;
+budgetDisplay.textContent = `Rs.${budget}`;
+
+setBudgetButton.addEventListener("click", function () {
+
+  let input = Number(budgetInput.value);
+
+  budget = input;
+
+  localStorage.setItem("budget", budget);
+
+  budgetDisplay.textContent = `Rs.${budget}`;
+
+  updateRemaining();
+
+  budgetInput.value = "";
+
+});
+
+let expenses = [];
+let editingIndex = -1;
+let expenseChart;
+
+
+addExpenseButton.addEventListener("click", addExpense);
+
+
+function addExpense () {
+     if(expenseNameInput.value === "" ||
+       expenseAmountInput.value === "" ||
+       categorySelect.value === "") {
+        alert("Please fill all fields.");
+        return;
+    }
+
+     let selectedDate;
+
+if (expenseDateInput.value) {
+    selectedDate = new Date(expenseDateInput.value);
+} else {
+    selectedDate = new Date();
+}
+
+let formattedDate =
+`${selectedDate.getDate()} ${selectedDate.toLocaleString("en", { month: "short" })} ${selectedDate.getFullYear()}`;
+
+let formattedMonth =
+`${selectedDate.toLocaleString("en", { month: "short" })} ${selectedDate.getFullYear()}`;
+     
+
+  let expense = {
+      name: expenseNameInput.value,
+      amount: Number(expenseAmountInput.value),
+      category: categorySelect.value,
+
+      date: formattedDate,
+      createdAt: Date.now(),
+      month: formattedMonth
+  }
+
+  if(editingIndex !== -1) {
+    expense.createdAt = expenses[editingIndex].createdAt;
+    expense.date = expenses[editingIndex].date;
+
+    expenses[editingIndex] = expense;
+  } else {
+    expenses.push(expense);
+  }
+  console.log(expenses);
+  applyFilters();
+  updateTotal();
+  updateRemaining();
+  saveExpenses();
+  populateMonthFilter();
+  updateChart(expenses);
+  clearInputs();
+  editingIndex = -1;
+  addExpenseButton.textContent = "Add Expense";
+}
+
+
+function displayExpense (expense, index) {
+  let expenseItem = document.createElement("div");
+  expenseItem.className = "expense-item";
+
+  let expenseInfo = document.createElement("div");
+  expenseInfo.className = "expense-info";
+
+  expenseInfo.innerHTML = `
+    <h3>${expense.name}</h3>
+    <p class="category-badge">🛒 ${expense.category}</p>
+    <p>📅 ${expense.date}</p>
+    <p>${expense.month}</p>
+    <div class="expense-amount">
+        Rs.${expense.amount}
+    </div>
+`;
+
+  let expenseButtons = document.createElement("div");
+  expenseButtons.className = "expense-buttons";
+
+  expenseItem.appendChild(expenseInfo);
+  expenseItem.appendChild(expenseButtons);
+
+  expenseList.appendChild(expenseItem);
+
+  let deleteButton = document.createElement("button");
+  deleteButton.textContent = "🗑 Delete";
+  expenseButtons.appendChild(deleteButton);
+
+  deleteButton.addEventListener("click", function () {
+    expenses.splice(index,1);
+    applyFilters();
+    updateTotal();
+    updateRemaining();
+    saveExpenses();
+    updateChart(expenses);
+  });
+
+  let editButton = document.createElement("button");
+  editButton.textContent = "✏ Edit";
+  expenseButtons.appendChild(editButton);
+
+  editButton.addEventListener("click", function () {
+    editingIndex = index;
+    expenseNameInput.value = expense.name;
+    expenseAmountInput.value = expense.amount;
+    categorySelect.value = expense.category;
+    addExpenseButton.textContent = "Update Expense";
+  });
+}
+
+searchExpenseInput.addEventListener("input", applyFilters);
+
+categoryFilter.addEventListener("change", applyFilters);
+
+sortExpenses.addEventListener("change", applyFilters);
+
+monthFilter.addEventListener("change", applyFilters);
+
+
+function applyFilters () {
+  let searchText = searchExpenseInput.value.toLowerCase();
+  let selectedCategory = categoryFilter.value;
+  let selectedMonth = monthFilter.value;
+   
+  let filteredExpenses = expenses.filter (function (expense) {
+    return expense.name.toLowerCase().includes(searchText) &&
+    (selectedCategory === "All" || expense.category === selectedCategory) && 
+    (selectedMonth === "All" || expense.month === selectedMonth);
+  });
+
+  let sortValue = sortExpenses.value;
+
+if (sortValue === "low-high") {
+
+    filteredExpenses.sort(function (a, b) {
+        return a.amount - b.amount;
+    });
+
+} else if (sortValue === "high-low") {
+
+    filteredExpenses.sort(function (a, b) {
+        return b.amount - a.amount;
+    });
+
+} else if (sortValue === "a-z") {
+
+    filteredExpenses.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    });
+
+} else if (sortValue === "z-a") {
+
+    filteredExpenses.sort(function (a, b) {
+        return b.name.localeCompare(a.name);
+    });
+}
+    else if (sortValue === "newest") {
+        filteredExpenses.sort(function (a, b) {
+            return b.createdAt - a.createdAt;
+        });
+    } else if (sortValue === "oldest") {
+        filteredExpenses.sort(function (a, b) {
+            return a.createdAt - b.createdAt;
+        });
+
+    }
+      renderExpenses(filteredExpenses);
+      updateFilteredTotal(filteredExpenses);
+      updateChart(filteredExpenses);
+}
+
+function populateMonthFilter () {
+
+  let months = [];
+
+  expenses.forEach(function (expense) {
+
+    if(!months.includes(expense.month)) {
+
+      months.push(expense.month);
+
+      }
+
+  });
+
+   monthFilter.innerHTML = `
+    <option value="All">All Months</option>
+    `;
+
+    months.forEach(function (month) {
+
+        let option = document.createElement("option");
+
+        option.value = month;
+        option.textContent = month;
+
+        monthFilter.appendChild(option);
+
+    });
+
+}
+
+function updateChart (expenseArray) {
+  let categoryTotals = [];
+
+  expenseArray.forEach(function(expense) {
+    if(categoryTotals[expense.category]) {
+      categoryTotals[expense.category] += expense.amount;
+    } else {
+      categoryTotals[expense.category] = expense.amount;
+    }
+
+    });
+
+    let labels = Object.keys(categoryTotals);
+    let data = Object.values(categoryTotals);
+
+    if(expenseChart) {
+      expenseChart.destroy();
+    }
+
+    expenseChart = new Chart(expenseChartCanvas.getContext("2d"), {
+    type: "pie",
+
+    data: {
+        labels: labels,
+
+        datasets: [{
+            label: "Expenses",
+
+            data: data,
+
+            backgroundColor: [
+                "#FF6384",
+                "#36A2EB",
+                "#FFCE56",
+                "#4BC0C0",
+                "#9966FF",
+                "#FF9F40",
+                "#8BC34A",
+                "#E91E63",
+                "#795548",
+                "#607D8B",
+                "#9C27B0"
+            ]
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+            legend: {
+                position: "bottom"
+            }
+        }
+    }
+});
+
+}
+
+function updateRemaining () {
+  let remaining = budget - getTotalExpenses();
+  remainingBudget.textContent = `Rs.${remaining}`;
+  if (remaining < 0) {
+    remainingBudget.style.color = "red";
+    budgetWarning.textContent = "⚠ Budget Exceeded!";
+  } else {
+    remainingBudget.style.color = "green";
+    budgetWarning.textContent = "";
+  }
+}
+  
+function getTotalExpenses() {
+    let total = 0;
+
+    for (let i = 0; i < expenses.length; i++) {
+        total += expenses[i].amount;
+    }
+
+    return total;
+}
+
+
+function updateTotal () {
+  let total = 0;
+    for(let i = 0; i < expenses.length; i++) {
+      total += expenses[i].amount;
+  }
+    totalExpenses.textContent = `Rs.${total}`;
+}
+
+function updateFilteredTotal(expenseArray) {
+
+    let total = 0;
+
+    expenseArray.forEach(function (expense) {
+        total += expense.amount;
+    });
+
+    totalExpenses.textContent = `Rs.${total}`;
+
+}
+
+
+function clearInputs () {
+  expenseNameInput.value = "";
+  expenseAmountInput.value = "";
+  categorySelect.value = "";
+  expenseDateInput.value = "";
+}
+
+
+function renderExpenses (expenseArray) {
+  expenseList.innerHTML = "";
+  for(let i=0;i<expenseArray.length;i++) {
+    displayExpense(expenseArray[i],i);
+  }
+}
+
+function saveExpenses () {
+  let data = JSON.stringify(expenses);
+  localStorage.setItem("expenses" , data);
+}
+
+function loadExpenses () {
+  let data = localStorage.getItem("expenses");
+  if(data) {
+    expenses = JSON.parse(data);
+  }
+}
+
+loadExpenses();
+
+populateMonthFilter();
+
+applyFilters();
+
+updateTotal();
+
+updateRemaining();
+
+updateChart(expenses);

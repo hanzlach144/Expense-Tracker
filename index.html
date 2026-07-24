@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Expense Tracker</title>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Expense Tracker</h1>
+
+    <!-- Add Expense Section -->
+    <div class="add-expense-section">
+
+    <div class="field">
+        <label for="expense-name">Expense Name</label>
+        <input type="text" id="expense-name">
+    </div>
+
+    <div class="field">
+        <label for="expense-amount">Expense Amount</label>
+        <input type="number" id="expense-amount">
+    </div>
+
+    <div class="field">
+       <label for="expenses-select">Expense Category</label>
+
+<select id="expenses-select">
+    <option value="">Please choose an option</option>
+
+    <option value="Bills">Bills</option>
+    <option value="Grocery">Grocery</option>
+    <option value="Fuel">Fuel</option>
+    <option value="Fees">Fees</option>
+    <option value="Healthcare">Healthcare</option>
+    <option value="Shopping">Shopping</option>
+    <option value="Education">Education</option>
+    <option value="Household">Household</option>
+    <option value="Other">Other</option>
+</select>
+    </div>
+
+    <div>
+    <label for="expense-date">Expense Date</label>
+    <input type="date" id="expense-date">
+    </div>
+    <button id="add-expense-btn">Add Expense +</button>
+
+</div>
+    <!-- Controls Section -->
+    <div class="controls-section">
+
+        <div class="control">
+
+            <label for="search-expense">Search</label>
+            <input
+                type="text"
+                id="search-expense"
+                placeholder="Search by name..."
+            >
+
+        </div>
+
+        <div class="control">
+           <label for="filter-category">Filter Category</label>
+
+            <select id="filter-category">
+                <option value="All">All</option>
+
+                <option value="Bills">Bills</option>
+                <option value="Grocery">Grocery</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Fees">Fees</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Education">Education</option>
+                <option value="Household">Household</option>
+                <option value="Other">Other</option>
+            </select>
+
+        </div>
+
+        <div class="control">
+
+            <label for="sort-expenses">Sort</label>
+
+            <select id="sort-expenses">
+                <option value="default">Default</option>
+                <option value="low-high">Amount (Low → High)</option>
+                <option value="high-low">Amount (High → Low)</option>
+                <option value="a-z">Name (A → Z)</option>
+                <option value="z-a">Name (Z → A)</option>
+                <option value="newest">Date (Newest First)</option>
+                <option value="oldest">Date (Oldest First)</option>
+            </select>
+
+        </div>
+
+        <div class="control">
+            <label for="month-filter">Month</label>
+
+            <select id="month-filter">
+            <option value="All">All Months</option>
+            </select>
+        </div>
+
+    </div>
+
+    <!-- Summary Section -->
+    <div class="summary-section">
+
+    <div class="summary-card">
+        <h3>Total Expenses</h3>
+        <p id="total-expenses">Rs.0</p>
+    </div>
+
+    <div class="summary-card">
+        <h3>Budget</h3>
+
+        <input
+            type="number"
+            id="budget-input"
+            placeholder="Enter Budget"
+        >
+
+        <button id="set-budget-btn">
+            Set Budget
+        </button>
+
+        <p id="budget-display">Rs.0</p>
+    </div>
+
+    <div class="summary-card">
+        <h3>Remaining</h3>
+
+        <p id="remaining-budget">Rs.0</p>
+        <p id="budget-warning"></p>
+    </div>
+
+</div>
+    <!-- Expense List -->
+    <div class="expenses-section">
+
+        <h2>Expense List</h2>
+
+        <div id="expense-list">
+
+        </div>
+
+    </div>
+
+    <div class="chart-section">
+    <h2>Expenses by Category</h2>
+
+    <div class="chart-container">
+        <canvas id="expenseChart"></canvas>
+    </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
