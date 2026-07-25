@@ -142,17 +142,8 @@
     </div>
 
 </div>
-    <!-- Expense List -->
-    <div class="expenses-section">
 
-        <h2>Expense List</h2>
-
-        <div id="expense-list">
-
-        </div>
-
-    </div>
-
+     <!-- Charts Section -->
     <div class="chart-section">
     <h2>Expenses by Category</h2>
 
@@ -169,9 +160,57 @@
         </div>
         </div>
 
+        <!-- Analytics Dashboard -->
+
+        <div class="analytics-section">
+
+    <h2>Expense Analytics</h2>
+
+    <div class="analytics-cards">
+
+        <div class="analytics-card">
+            <h3>Highest Expense</h3>
+            <p id="highest-expense">Rs.0</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Top Category</h3>
+            <p id="top-category">-</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Total Transactions</h3>
+            <p id="total-transactions">0</p>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Average Expense</h3>
+            <p id="average-expense">Rs.0</p>
+        </div>
+
+    </div>
+
+</div>
+
+    <button id="export-pdf-btn">
+      Export PDF
+    </button>
+
+    <!-- Expense List -->
+    <div class="expenses-section">
+
+        <h2>Expense List</h2>
+
+        <div id="expense-list">
+
+        </div>
+
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="app.js"></script>
 
 </body>

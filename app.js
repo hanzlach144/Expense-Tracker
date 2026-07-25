@@ -12,6 +12,11 @@ const setBudgetButton = document.getElementById("set-budget-btn");
 const expenseDateInput = document.getElementById("expense-date");
 const expenseChartCanvas = document.getElementById("expenseChart");
 const expenseBarChart = document.getElementById("expenseBarChart");
+const highestExpense = document.getElementById("highest-expense");
+const topCategory = document.getElementById("top-category");
+const totalTransactions = document.getElementById("total-transactions");
+const averageExpense = document.getElementById("average-expense");
+const exportPdfButton = document.getElementById("export-pdf-btn");
 
 const budgetDisplay = document.getElementById("budget-display");
 const remainingBudget = document.getElementById("remaining-budget");
@@ -42,6 +47,69 @@ let editingIndex = -1;
 let expenseChart;
 let barChart;
 
+exportPdfButton.addEventListener("click", exportPDF);
+
+function exportPDF () {
+    const { jsPDF } = window.jspdf;
+
+    let doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("Expense Tracker Report", 20, 20);
+    let today = new Date();
+
+    doc.setFontSize(12);
+
+    doc.text(`Generated on: ${today.toDateString()}`, 20, 30);
+
+    doc.setFontSize(14);
+
+doc.text(`Budget: Rs.${budget}`, 20, 45);
+
+doc.text(
+    `Remaining Budget: ${remainingBudget.textContent}`,
+    20,
+    55
+);
+
+doc.text(
+    `Total Expenses: ${totalExpenses.textContent}`,
+    20,
+    65
+);
+
+doc.setFontSize(16);
+
+doc.text("Expense List", 20, 85);
+
+doc.setFontSize(12);
+
+doc.text("Name", 20, 95);
+doc.text("Category", 80, 95);
+doc.text("Amount", 135, 95);
+doc.text("Date", 170, 95);
+
+doc.line(20, 98, 190, 98);
+
+let y = 108;
+
+expenses.forEach(function(expense) {
+
+    if (y > 270) {
+        doc.addPage();
+        y = 20;
+    }
+
+    doc.text(expense.name, 20, y);
+    doc.text(expense.category, 80, y);
+    doc.text(`Rs.${expense.amount}`, 135, y);
+    doc.text(expense.date, 170, y);
+
+    y += 10;
+
+});
+
+    doc.save("Expense_Report.pdf");
+}
 
 addExpenseButton.addEventListener("click", addExpense);
 
@@ -207,6 +275,7 @@ if (sortValue === "low-high") {
       updateFilteredTotal(filteredExpenses);
       updateChart(filteredExpenses);
       updateBarChart(filteredExpenses);
+      updateAnalytics(filteredExpenses);
 }
 
 function populateMonthFilter () {
@@ -382,6 +451,57 @@ function updateBarChart(expenseArray) {
 
 }
 
+function updateAnalytics(expenseArray) {
+
+    totalTransactions.textContent = expenseArray.length;
+    if (expenseArray.length === 0) {
+    highestExpense.textContent = "Rs.0";
+    topCategory.textContent = "-";
+    averageExpense.textContent = "Rs.0";
+    return;
+}
+
+    let highest = 0;
+    expenseArray.forEach(function(expense) {
+
+      if(expense.amount > highest) {
+        highest = expense.amount;
+      }
+    });
+
+    highestExpense.textContent = `Rs.${highest}`;
+
+    let categoryTotals = {};
+    expenseArray.forEach(function(expense) {
+      if(categoryTotals[expense.category]) {
+        categoryTotals[expense.category] += expense.amount;
+      } else {
+        categoryTotals[expense.category] = expense.amount;
+      }
+    });
+
+    let highestCategory = "";
+    let highestAmount = 0;
+
+    for(let category in categoryTotals) { 
+      if(categoryTotals[category] > highestAmount) {
+        highestAmount = categoryTotals[category];
+        highestCategory = category;
+      }
+
+    }
+    topCategory.textContent = highestCategory;
+
+    let total = getFilteredTotal(expenseArray);
+
+    let average = 0;
+    if(expenseArray.length > 0) {
+      average = total / expenseArray.length;
+    }
+
+    averageExpense.textContent = `Rs.${Math.round(average)}`;
+
+}
 
 function updateRemaining () {
   let remaining = budget - getTotalExpenses();
@@ -414,13 +534,21 @@ function updateTotal () {
     totalExpenses.textContent = `Rs.${total}`;
 }
 
-function updateFilteredTotal(expenseArray) {
+function getFilteredTotal(expenseArray) {
 
-    let total = 0;
+  let total = 0;
 
     expenseArray.forEach(function (expense) {
         total += expense.amount;
     });
+
+    return total;
+
+}
+
+function updateFilteredTotal(expenseArray) {
+
+    let total = getFilteredTotal(expenseArray);
 
     totalExpenses.textContent = `Rs.${total}`;
 

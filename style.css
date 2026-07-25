@@ -225,3 +225,38 @@ button:hover {
     height: 350px;
     margin: auto;
 }
+
+.analytics-section{
+    margin-top:40px;
+}
+
+.analytics-cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.analytics-card{
+    background:#ffffff;
+    border-radius:12px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 5px 12px rgba(0,0,0,.08);
+}
+
+.analytics-card h3{
+    margin-bottom:15px;
+}
+
+.analytics-card p{
+    font-size:28px;
+    font-weight:bold;
+    color:#1e88e5;
+}
+
+#export-pdf-btn{
+    display: block;
+    margin: 30px auto;
+    padding: 12px 24px;
+}
