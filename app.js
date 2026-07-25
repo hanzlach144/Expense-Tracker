@@ -17,6 +17,7 @@ const topCategory = document.getElementById("top-category");
 const totalTransactions = document.getElementById("total-transactions");
 const averageExpense = document.getElementById("average-expense");
 const exportPdfButton = document.getElementById("export-pdf-btn");
+const darkModeButton = document.getElementById("dark-mode-btn");
 
 const budgetDisplay = document.getElementById("budget-display");
 const remainingBudget = document.getElementById("remaining-budget");
@@ -25,6 +26,12 @@ const monthFilter = document.getElementById("month-filter");
 
 let budget = Number(localStorage.getItem("budget")) || 0;
 budgetDisplay.textContent = `Rs.${budget}`;
+
+function updateBudgetState() {
+
+    addExpenseButton.disabled = budget <= 0;
+
+}
 
 setBudgetButton.addEventListener("click", function () {
 
@@ -37,6 +44,7 @@ setBudgetButton.addEventListener("click", function () {
   budgetDisplay.textContent = `Rs.${budget}`;
 
   updateRemaining();
+  updateBudgetState();
 
   budgetInput.value = "";
 
@@ -46,6 +54,38 @@ let expenses = [];
 let editingIndex = -1;
 let expenseChart;
 let barChart;
+
+
+function updateThemeButton() {
+
+    if (document.body.classList.contains("dark-mode")) {
+
+        darkModeButton.textContent = "☀ Light Mode";
+
+    } else {
+
+        darkModeButton.textContent = "🌙 Dark Mode";
+
+    }
+
+}
+
+darkModeButton.addEventListener("click", function () {
+
+    document.body.classList.toggle("dark-mode");
+    updateThemeButton();
+
+    if (document.body.classList.contains("dark-mode")) {
+
+        localStorage.setItem("theme", "dark");
+
+    } else {
+
+        localStorage.setItem("theme", "light");
+
+    }
+
+});
 
 exportPdfButton.addEventListener("click", exportPDF);
 
@@ -115,6 +155,11 @@ addExpenseButton.addEventListener("click", addExpense);
 
 
 function addExpense () {
+    if (budget <= 0) {
+    alert("Please set your budget first.");
+    return;
+}
+
      if(expenseNameInput.value === "" ||
        expenseAmountInput.value === "" ||
        categorySelect.value === "") {
@@ -589,3 +634,14 @@ populateMonthFilter();
 applyFilters();
 
 updateRemaining();
+
+updateBudgetState()
+
+let savedTheme = localStorage.getItem("theme");
+
+if (savedTheme === "dark") {
+
+    document.body.classList.add("dark-mode");
+
+}
+updateThemeButton();
