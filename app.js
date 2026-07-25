@@ -33,6 +33,12 @@ function updateBudgetState() {
 
 }
 
+function updateExportState() {
+
+    exportPdfButton.disabled = expenses.length === 0;
+
+}
+
 setBudgetButton.addEventListener("click", function () {
 
   let input = Number(budgetInput.value);
@@ -147,6 +153,15 @@ expenses.forEach(function(expense) {
     y += 10;
 
 });
+doc.line(20, y + 5, 190, y + 5);
+
+doc.setFontSize(14);
+
+doc.text(
+    `Total Expenses: ${totalExpenses.textContent}`,
+    20,
+    y + 20
+);
 
     doc.save("Expense_Report.pdf");
 }
@@ -201,6 +216,7 @@ let formattedMonth =
     expenses.push(expense);
   }
   saveExpenses();
+  updateExportState();
   populateMonthFilter();
   applyFilters();
   updateRemaining();
@@ -240,8 +256,13 @@ function displayExpense (expense, index) {
   expenseButtons.appendChild(deleteButton);
 
   deleteButton.addEventListener("click", function () {
+
+    let confirmDelete = confirm("Are you sure you want to delete this expense?");
+
+    if (!confirmDelete) return;
     expenses.splice(index,1);
     saveExpenses();
+    updateExportState();
     populateMonthFilter();
     applyFilters();
     updateRemaining();
@@ -610,6 +631,16 @@ function clearInputs () {
 
 function renderExpenses (expenseArray) {
   expenseList.innerHTML = "";
+  if (expenseArray.length === 0) {
+
+    expenseList.innerHTML = `
+        <p class="empty-state">
+            📭 No expenses found.
+        </p>
+    `;
+
+    return;
+}
   for(let i=0;i<expenseArray.length;i++) {
     displayExpense(expenseArray[i],i);
   }
@@ -636,6 +667,8 @@ applyFilters();
 updateRemaining();
 
 updateBudgetState()
+
+updateExportState();
 
 let savedTheme = localStorage.getItem("theme");
 

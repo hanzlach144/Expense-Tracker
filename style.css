@@ -1,3 +1,9 @@
+* {
+    transition: background-color 0.3s ease,
+                color 0.3s ease,
+                border-color 0.3s ease;
+}
+
 body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
@@ -34,22 +40,33 @@ label {
 
 input,
 select {
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+    transition: 0.3s ease;
+    outline: none;
     flex:1;
-    padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
     box-sizing: border-box;
+}
+
+input:focus,
+select:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
 }
 
 button {
     padding: 12px;
     background-color: #007bff;
     color: white;
-    border: none;
-    border-radius: 5px;
     font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
 }
 
 #add-expense-btn {
@@ -58,9 +75,14 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    background-color:blue;
 }
 
+button:active {
+    transform: scale(0.97);
+}
 
 #expense-list {
     margin-top: 20px;
@@ -77,12 +99,13 @@ button:hover {
     margin-bottom: 15px;
 
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.3s ease, box-shadow 0.25s ease;
 }
 
 .expense-item:hover{
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    transform: scale(1.01);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
 .expense-info h3 {
@@ -95,6 +118,13 @@ button:hover {
     margin: 4px 0;
     color: #666;
     font-size: 15px;
+}
+
+.empty-state{
+    text-align:center;
+    color:gray;
+    padding:40px;
+    font-size:20px;
 }
 
 .category-badge {
@@ -185,14 +215,14 @@ button:hover {
     background: linear-gradient(135deg, #007bff, #4da3ff);
     color: white;
     padding: 25px 20px;
-    border-radius: 10px;
+    border-radius: 15px;
     text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.2s ease;
 }
 
 .summary-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
 }
 
 .summary-card h3 {
@@ -227,10 +257,16 @@ button:hover {
     margin-top: 40px;
 }
 
+.chart-section:hover {
+    transform: translateY(-6px);
+}
+
 .chart-container {
     width: 500px;
     height: 350px;
     margin: auto;
+    border-radius: 15px;
+    overflow: hidden;
 }
 
 .analytics-section{
@@ -246,10 +282,16 @@ button:hover {
 
 .analytics-card{
     background:#ffffff;
-    border-radius:12px;
+    border-radius:15px;
     padding:25px;
     text-align:center;
     box-shadow:0 5px 12px rgba(0,0,0,.08);
+    transition: 0.3s ease;
+}
+
+.analytics-card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
 }
 
 .analytics-card h3{
@@ -266,6 +308,11 @@ button:hover {
     display: block;
     margin: 30px auto;
     padding: 12px 24px;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 body.dark-mode {
@@ -295,4 +342,24 @@ body.dark-mode select {
 body.dark-mode button {
     background-color: #444;
     color: white;
+}
+
+footer{
+    margin-top:40px;
+    text-align:center;
+    color:gray;
+    font-size:14px;
+}
+
+::-webkit-scrollbar{
+    width:10px;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#4CAF50;
+    border-radius:10px;
+}
+
+::-webkit-scrollbar-track{
+    background:#eee;
 }
