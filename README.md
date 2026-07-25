@@ -1,24 +1,28 @@
 # Expense Tracker
 
-A modern expense tracker built with HTML, CSS and JavaScript.
+A modern Expense Tracker built with HTML, CSS and JavaScript.
 
 ## Features
 
-- Add/Edit/Delete Expenses
 - Budget Management
-- Remaining Budget
-- Search Expenses
-- Category Filter
-- Month Filter
-- Sorting
+- Add / Edit / Delete Expenses
+- Search & Filters
+- Category & Month Filtering
+- Expense Analytics Dashboard
+- Pie Chart & Bar Chart (Chart.js)
+- PDF Export (jsPDF)
+- Dark Mode
 - Local Storage
-- Pie Chart Analytics
-- Responsive UI
+- Responsive Design
 
 ## Technologies
 
-- HTML
-- CSS
-- JavaScript
+- HTML5
+- CSS3
+- JavaScript (ES6)
 - Chart.js
-- Local Storage
+- jsPDF
+
+## Live Demo
+
+https://hanzlach144.github.io/Expense-Tracker/
