@@ -72,6 +72,18 @@ Users can securely register, log in, manage their expenses, track budgets, visua
 
 ---
 
+## Skills Demonstrated
+
+- REST APIs
+- JWT Authentication
+- CRUD Operations
+- MySQL
+- MVC Folder Structure
+- Password Hashing
+- Frontend Development
+- Responsive UI
+- Data Visualization
+
 # 📁 Project Structure
 
 ```
