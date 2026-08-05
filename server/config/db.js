@@ -28,4 +28,13 @@ db.connect(function(error){
 
 });
 
+db.connect((err) => {
+    if (err) {
+        console.log(err);
+        return;
+    }
+
+    console.log("Connected to Railway MySQL");
+});
+
 module.exports = db;
