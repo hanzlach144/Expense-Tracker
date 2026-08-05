@@ -1,3 +1,17 @@
+const user = localStorage.getItem("loggedInUser");
+
+if (!user) {
+
+    window.location.href = "login.html";
+
+}
+
+const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+
+const welcomeText = document.getElementById("welcomeText");
+
+welcomeText.textContent = `👋 Welcome back, ${loggedInUser.username}!`;
+
 const expenseNameInput = document.getElementById("expense-name");
 const expenseAmountInput = document.getElementById("expense-amount");
 const addExpenseButton = document.getElementById("add-expense-btn");
@@ -25,7 +39,8 @@ const budgetWarning = document.getElementById("budget-warning");
 const monthFilter = document.getElementById("month-filter");
 
 let budget = Number(localStorage.getItem("budget")) || 0;
-budgetDisplay.textContent = `Rs.${budget}`;
+budgetDisplay.textContent =
+`PKR ${budget.toLocaleString()}`;
 
 function updateBudgetState() {
 
@@ -46,8 +61,9 @@ setBudgetButton.addEventListener("click", function () {
   budget = input;
 
   localStorage.setItem("budget", budget);
-
-  budgetDisplay.textContent = `Rs.${budget}`;
+ 
+  budgetDisplay.textContent =
+`PKR ${budget.toLocaleString()}`;
 
   updateRemaining();
   updateBudgetState();
@@ -206,23 +222,98 @@ let formattedMonth =
       createdAt: Date.now(),
       month: formattedMonth
   }
+    if(editingIndex !== -1) {
 
-  if(editingIndex !== -1) {
     expense.createdAt = expenses[editingIndex].createdAt;
     expense.date = expenses[editingIndex].date;
 
-    expenses[editingIndex] = expense;
-  } else {
-    expenses.push(expense);
-  }
-  saveExpenses();
-  updateExportState();
-  populateMonthFilter();
-  applyFilters();
-  updateRemaining();
-  clearInputs();
-  editingIndex = -1;
-  addExpenseButton.textContent = "Add Expense";
+    const token = localStorage.getItem("token");
+
+fetch(`http://localhost:3000/expenses/${expense.createdAt}`, {
+
+    method: "PUT",
+
+    headers: {
+
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+
+    },
+
+    body: JSON.stringify(expense)
+
+})
+
+    .then(function(response){
+
+        return response.json();
+
+    })
+
+    .then(function(){
+
+        loadExpenses();
+
+        clearInputs();
+
+        editingIndex = -1;
+
+        addExpenseButton.textContent = "Add Expense";
+
+    });
+
+    return;
+
+} else {
+
+    const token = localStorage.getItem("token");
+
+fetch("http://localhost:3000/expenses", {
+
+    method: "POST",
+
+    headers: {
+
+        "Content-Type": "application/json",
+
+        Authorization: `Bearer ${token}`
+
+    },
+
+    body: JSON.stringify(expense)
+
+})
+
+    .then(function(response){
+
+        return response.json();
+
+    })
+
+    .then(function(data){
+
+        loadExpenses();
+
+        clearInputs();
+
+        editingIndex = -1;
+
+        addExpenseButton.textContent = "Add Expense";
+
+    });
+
+    return;
+
+}
+
+saveExpenses();
+updateExportState();
+populateMonthFilter();
+applyFilters();
+updateRemaining();
+clearInputs();
+editingIndex = -1;
+addExpenseButton.textContent = "Add Expense";
 }
 
 
@@ -260,13 +351,32 @@ function displayExpense (expense, index) {
     let confirmDelete = confirm("Are you sure you want to delete this expense?");
 
     if (!confirmDelete) return;
-    expenses.splice(index,1);
-    saveExpenses();
-    updateExportState();
-    populateMonthFilter();
-    applyFilters();
-    updateRemaining();
+
+    const token = localStorage.getItem("token");
+
+fetch(`http://localhost:3000/expenses/${expenses[index].createdAt}`, {
+
+    method: "DELETE",
+
+    headers: {
+
+        Authorization: `Bearer ${token}`
+
+    }
+
+}) 
+
+.then(function(response){
+
+    return response.json();
+
+})
+.then(function(){
+
+    loadExpenses();
+
   });
+});
 
   let editButton = document.createElement("button");
   editButton.textContent = "✏ Edit";
@@ -338,7 +448,7 @@ if (sortValue === "low-high") {
 
     }
       renderExpenses(filteredExpenses);
-      updateFilteredTotal(filteredExpenses);
+      updateTotal();
       updateChart(filteredExpenses);
       updateBarChart(filteredExpenses);
       updateAnalytics(filteredExpenses);
@@ -380,9 +490,9 @@ function updateChart (expenseArray) {
 
   expenseArray.forEach(function(expense) {
     if(categoryTotals[expense.category]) {
-      categoryTotals[expense.category] += expense.amount;
+      categoryTotals[expense.category] += Number(expense.amount);
     } else {
-      categoryTotals[expense.category] = expense.amount;
+      categoryTotals[expense.category] = Number(expense.amount);
     }
 
     });
@@ -440,9 +550,9 @@ function updateBarChart(expenseArray) {
 
   expenseArray.forEach(function(expense) {
     if(categoryTotals[expense.category]) {
-      categoryTotals[expense.category] += expense.amount;
+      categoryTotals[expense.category] += Number(expense.amount);
     } else {
-      categoryTotals[expense.category] = expense.amount;
+      categoryTotals[expense.category] = Number(expense.amount);
     }
 
     });
@@ -571,7 +681,8 @@ function updateAnalytics(expenseArray) {
 
 function updateRemaining () {
   let remaining = budget - getTotalExpenses();
-  remainingBudget.textContent = `Rs.${remaining}`;
+  remainingBudget.textContent =
+`PKR ${remaining.toLocaleString()}`;
   if (remaining < 0) {
     remainingBudget.style.color = "red";
     budgetWarning.textContent = "⚠ Budget Exceeded!";
@@ -585,7 +696,7 @@ function getTotalExpenses() {
     let total = 0;
 
     for (let i = 0; i < expenses.length; i++) {
-        total += expenses[i].amount;
+        total += Number(expenses[i].amount);
     }
 
     return total;
@@ -595,9 +706,10 @@ function getTotalExpenses() {
 function updateTotal () {
   let total = 0;
     for(let i = 0; i < expenses.length; i++) {
-      total += expenses[i].amount;
+      total += Number(expenses[i].amount);
   }
-    totalExpenses.textContent = `Rs.${total}`;
+    totalExpenses.textContent =
+`PKR ${total.toLocaleString()}`;
 }
 
 function getFilteredTotal(expenseArray) {
@@ -605,7 +717,7 @@ function getFilteredTotal(expenseArray) {
   let total = 0;
 
     expenseArray.forEach(function (expense) {
-        total += expense.amount;
+        total += Number(expense.amount);
     });
 
     return total;
@@ -615,8 +727,9 @@ function getFilteredTotal(expenseArray) {
 function updateFilteredTotal(expenseArray) {
 
     let total = getFilteredTotal(expenseArray);
-
-    totalExpenses.textContent = `Rs.${total}`;
+ 
+    totalExpenses.textContent =
+`PKR ${total.toLocaleString()}`;
 
 }
 
@@ -647,16 +760,56 @@ function renderExpenses (expenseArray) {
 }
 
 function saveExpenses () {
-  let data = JSON.stringify(expenses);
-  localStorage.setItem("expenses" , data);
+  // let data = JSON.stringify(expenses);
+  // localStorage.setItem("expenses" , data);
 }
 
-function loadExpenses () {
-  let data = localStorage.getItem("expenses");
-  if(data) {
-    expenses = JSON.parse(data);
-  }
+async function loadExpenses() {
+
+    try {
+
+        const token = localStorage.getItem("token");
+
+const response = await fetch("http://localhost:3000/expenses", {
+
+    headers: {
+
+        Authorization: `Bearer ${token}`
+
+    }
+
+});
+
+        expenses = await response.json();
+
+        updateTotal();
+
+        populateMonthFilter();
+
+        applyFilters();
+
+        updateRemaining();
+
+        updateBudgetState();
+
+        updateExportState();
+
+    }
+
+    catch (error) {
+
+        console.error("Error loading expenses:", error);
+
+    }
+
 }
+
+// function loadExpenses () {
+//   let data = localStorage.getItem("expenses");
+//   if(data) {
+//     expenses = JSON.parse(data);
+//   }
+// }
 
 loadExpenses();
 
@@ -678,3 +831,13 @@ if (savedTheme === "dark") {
 
 }
 updateThemeButton();
+
+const logoutButton = document.getElementById("logoutBtn");
+
+logoutButton.addEventListener("click", function(){
+
+    localStorage.removeItem("loggedInUser");
+
+    window.location.href = "login.html";
+
+});
